@@ -66,6 +66,38 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         }
     }
 
+    // 更新联系人
+    public boolean updateContact(String oldName, String oldPhone, String newName, String newPhone) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        try {
+            ContentValues values = new ContentValues();
+            values.put(COLUMN_NAME, newName);
+            values.put(COLUMN_PHONE, newPhone);
+
+            int rowsAffected = db.update(TABLE_CONTACTS, values,
+                    COLUMN_NAME + " = ? AND " + COLUMN_PHONE + " = ?",
+                    new String[]{oldName, oldPhone});
+
+            return rowsAffected > 0;
+        } finally {
+            db.close();
+        }
+    }
+
+    // 删除联系人
+    public boolean deleteContact(String name, String phone) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        try {
+            int rowsDeleted = db.delete(TABLE_CONTACTS,
+                    COLUMN_NAME + " = ? AND " + COLUMN_PHONE + " = ?",
+                    new String[]{name, phone});
+
+            return rowsDeleted > 0;
+        } finally {
+            db.close();
+        }
+    }
+
     // 获取所有联系人（按姓名排序）
     public List<Contact> getAllContacts() {
         List<Contact> contacts = new ArrayList<>();
