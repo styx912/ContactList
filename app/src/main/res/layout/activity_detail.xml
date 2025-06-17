@@ -47,6 +47,36 @@
             android:layout_height="wrap_content"
             android:text="拨打号码"
             android:backgroundTint="#FF4081"
-            android:textColor="#FFFFFF"/>
+            android:textColor="#FFFFFF"
+            android:layout_marginBottom="16dp"/>
+
+        <!-- 新增的修改/删除按钮区域 -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center"
+            android:layout_marginTop="16dp">
+
+            <Button
+                android:id="@+id/editButton"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_marginEnd="8dp"
+                android:text="修改联系人"
+                android:backgroundTint="#4CAF50"
+                android:textColor="#FFFFFF"/>
+
+            <Button
+                android:id="@+id/deleteButton"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_marginStart="8dp"
+                android:text="删除联系人"
+                android:backgroundTint="#F44336"
+                android:textColor="#FFFFFF"/>
+        </LinearLayout>
     </LinearLayout>
 </ScrollView>
