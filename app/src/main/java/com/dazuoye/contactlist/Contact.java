@@ -12,6 +12,17 @@ public class Contact {
     }
 
     // Getter方法
+    public long getId() { return id; }
     public String getName() { return name; }
     public String getPhone() { return phone; }
+
+    // Setter方法
+    public void setId(long id) { this.id = id; }
+    public void setName(String name) { this.name = name; }
+    public void setPhone(String phone) { this.phone = phone; }
+
+    @Override
+    public String toString() {
+        return name + " (" + phone + ")";
+    }
 }
