@@ -8,6 +8,7 @@
     android:gravity="center_vertical"
     android:background="?android:attr/selectableItemBackground">
 
+    <!-- 头像 -->
     <ImageView
         android:id="@+id/avatar"
         android:layout_width="48dp"
@@ -17,6 +18,7 @@
         android:background="@drawable/circle_background"
         android:layout_marginEnd="16dp"/>
 
+    <!-- 姓名和电话 -->
     <LinearLayout
         android:layout_width="0dp"
         android:layout_height="wrap_content"
@@ -38,4 +40,14 @@
             android:textSize="14sp"
             android:textColor="#8A000000"/>
     </LinearLayout>
+
+    <!-- 新增的心形图标 -->
+    <ImageView
+        android:id="@+id/pinIcon"
+        android:layout_width="24dp"
+        android:layout_height="24dp"
+        android:layout_marginStart="16dp"
+        android:src="@drawable/ic_favorite_border"
+    android:tint="#FF4081"
+    android:contentDescription="@string/pin_contact"/>
 </LinearLayout>
