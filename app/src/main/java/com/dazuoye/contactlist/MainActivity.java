@@ -30,6 +30,12 @@ public class MainActivity extends AppCompatActivity {
 
     // 中文排序比较器
     private final Comparator<Contact> chineseComparator = (c1, c2) -> {
+        // 先按置顶状态排序（置顶的排前面）
+        if (c1.isPinned() != c2.isPinned()) {
+            return c1.isPinned() ? -1 : 1;
+        }
+
+        // 置顶状态相同的，按中文姓名排序
         Collator collator = Collator.getInstance(Locale.CHINA);
         return collator.compare(c1.getName(), c2.getName());
     };
@@ -69,16 +75,16 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void addTestContacts() {
-        String[] names = {"安哲平", "白梓岚", "陈诚斌", "丁真", "方向成", "高玉波", "黄绍轩", "金成武","孔惟桢","李俊真","马玉琦","周振杰"};
+        String[] names = {"王家乐", "何欣怡", "谭若曦","张若应"};
         String[] phones = {
-                "13800138000", "13900139000", "13700137000",
-                "13600136000", "13500135000", "13400134000",
-                "13300133000", "13200132000", "14521458965",
-                "14785236987", "12365478541", "15995874521"
+                "14547856321", "19547541265", "18987458965","12547845236"
         };
 
+        // 随机设置一些联系人置顶
+        Random random = new Random();
         for (int i = 0; i < names.length; i++) {
-            Contact contact = new Contact(0, names[i], phones[i]);
+            boolean isPinned = random.nextBoolean(); // 随机置顶状态
+            Contact contact = new Contact(0, names[i], phones[i], isPinned);
             dbHelper.addContact(contact);
         }
     }
@@ -156,6 +162,34 @@ public class MainActivity extends AppCompatActivity {
             holder.name.setText(contact.getName());
             holder.phone.setText(contact.getPhone());
 
+            // 设置置顶图标
+            ImageView pinIcon = convertView.findViewById(R.id.pinIcon);
+            if (contact.isPinned()) {
+                pinIcon.setImageResource(R.drawable.ic_favorite);
+            } else {
+                pinIcon.setImageResource(R.drawable.ic_favorite_border);
+            }
+
+            // 设置置顶点击监听
+            pinIcon.setOnClickListener(v -> {
+                // 切换置顶状态
+                boolean newPinnedState = !contact.isPinned();
+                contact.setPinned(newPinnedState);
+
+                // 更新数据库
+                dbHelper.togglePinnedStatus(contact.getId(), newPinnedState);
+
+                // 更新图标
+                if (newPinnedState) {
+                    pinIcon.setImageResource(R.drawable.ic_favorite);
+                } else {
+                    pinIcon.setImageResource(R.drawable.ic_favorite_border);
+                }
+
+                // 刷新列表（因为排序会改变）
+                refreshContacts();
+            });
+
             return convertView;
         }
 
@@ -163,6 +197,7 @@ public class MainActivity extends AppCompatActivity {
             ImageView avatar;
             TextView name;
             TextView phone;
+            ImageView pinIcon;
         }
     }
 }
