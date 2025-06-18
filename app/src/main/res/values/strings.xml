@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">ContactList</string>
+    <string name="pin_contact">置顶联系人</string>
 </resources>
