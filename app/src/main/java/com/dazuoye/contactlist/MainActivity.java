@@ -154,13 +154,6 @@ public class MainActivity extends AppCompatActivity {
 
             Contact contact = contactList.get(position);
 
-            // 设置头像
-            int avatarColor = Color.argb(255,
-                    new Random().nextInt(256),
-                    new Random().nextInt(256),
-                    new Random().nextInt(256));
-            holder.avatar.setColorFilter(avatarColor);
-
             // 设置文本内容
             holder.name.setText(contact.getName());
             holder.phone.setText(contact.getPhone());
