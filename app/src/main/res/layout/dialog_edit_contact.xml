@@ -15,10 +15,11 @@
     <EditText
         android:id="@+id/editName"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:inputType="textPersonName"
-        android:maxLines="1"
-        android:hint="输入姓名"/>
+        android:layout_height="48dp"
+    android:paddingVertical="12dp"
+    android:inputType="textPersonName"
+    android:maxLines="1"
+    android:hint="输入姓名"/>
 
     <TextView
         android:layout_width="match_parent"
@@ -26,13 +27,14 @@
         android:text="电话"
         android:textSize="16sp"
         android:layout_marginTop="16dp"
-        android:layout_marginBottom="4dp"/>
+    android:layout_marginBottom="4dp"/>
 
     <EditText
         android:id="@+id/editPhone"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:inputType="phone"
-        android:maxLines="1"
-        android:hint="输入电话号码"/>
+        android:layout_height="48dp"
+    android:paddingVertical="12dp"
+    android:inputType="phone"
+    android:maxLines="1"
+    android:hint="输入电话号码"/>
 </LinearLayout>
