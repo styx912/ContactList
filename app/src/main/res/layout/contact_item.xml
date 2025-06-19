@@ -13,7 +13,7 @@
         android:id="@+id/avatar"
         android:layout_width="48dp"
         android:layout_height="48dp"
-        android:src="@drawable/ic_person"
+        android:src="@drawable/ic_person1"
         android:scaleType="centerCrop"
         android:background="@drawable/circle_background"
         android:layout_marginEnd="16dp"/>
