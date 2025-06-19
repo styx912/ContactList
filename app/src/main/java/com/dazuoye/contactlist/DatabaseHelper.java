@@ -22,7 +22,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     public static final String COLUMN_PHONE = "phone";
     public static final String COLUMN_IS_PINNED = "is_pinned";
 
-    // 预定义所有列（假设表结构已通过升级保证）
+    // 预定义所有列
     private static final String[] ALL_COLUMNS = {
             COLUMN_ID, COLUMN_NAME, COLUMN_PHONE, COLUMN_IS_PINNED
     };
@@ -78,7 +78,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         }
     }
 
-    // 添加联系人（简化 pinned 状态处理）
+    // 添加联系人
     public void addContact(Contact contact) {
         try (SQLiteDatabase db = getWritableDatabase()) {
             ContentValues values = new ContentValues();
@@ -112,7 +112,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         }
     }
 
-    // 获取所有联系人（优化列查询）
+    // 获取所有联系人
     public List<Contact> getAllContacts() {
         List<Contact> contacts = new ArrayList<>();
         String[] columns = hasPinnedColumn ? ALL_COLUMNS : new String[]{COLUMN_ID, COLUMN_NAME, COLUMN_PHONE};

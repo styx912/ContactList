@@ -75,9 +75,12 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void addTestContacts() {
-        String[] names = {"王家乐", "何欣怡", "谭若曦","张若应"};
+        String[] names = {"安哲平", "白梓岚", "陈诚斌", "丁真", "方向成", "高玉波", "黄绍轩", "金成武","孔惟桢","李俊真","马玉琦","周振杰"};
         String[] phones = {
-                "14547856321", "19547541265", "18987458965","12547845236"
+                "13800138000", "13900139000", "13700137000",
+                "13600136000", "13500135000", "13400134000",
+                "13300133000", "13200132000", "14521458965",
+                "14785236987", "12365478541", "15995874521"
         };
 
         // 随机设置一些联系人置顶
@@ -197,7 +200,6 @@ public class MainActivity extends AppCompatActivity {
             ImageView avatar;
             TextView name;
             TextView phone;
-            ImageView pinIcon;
         }
     }
 }
