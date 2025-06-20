@@ -77,19 +77,15 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void addTestContacts() {
-        String[] names = {"安哲平", "白梓岚", "陈诚斌", "丁真", "方向成", "高玉波", "黄绍轩", "金成武","孔惟桢","李俊真","马玉琦","周振杰"};
+        String[] names = {"安哲平", "孙笑川", "侯国玉", "丁真", "方向成", "高玉波", "黄绍轩", "金成武","孔惟桢","李俊真","马玉琦","周振杰"};
         String[] phones = {
                 "13800138000", "13900139000", "13700137000",
                 "13600136000", "13500135000", "13400134000",
                 "13300133000", "13200132000", "14521458965",
                 "14785236987", "12365478541", "15995874521"
         };
-        String[] avatars = {
-                "android.resource://" + getPackageName() + "/" + R.drawable.ic_person1,
-                "android.resource://" + getPackageName() + "/" + R.drawable.ic_person2,
-                "android.resource://" + getPackageName() + "/" + R.drawable.ic_person3,
-                "android.resource://" + getPackageName() + "/" + R.drawable.ic_person4
-        };
+
+        String avatars = "android.resource://" + getPackageName() + "/" + R.drawable.ic_person1;
 
         // 随机设置一些联系人置顶
         Random random = new Random();
@@ -98,7 +94,7 @@ public class MainActivity extends AppCompatActivity {
             boolean isPinned = random.nextBoolean();
 
             // 预设头像
-            String avatar = avatars[0];
+            String avatar = avatars;
 
             // 创建联系人对象
             Contact contact = new Contact(0, names[i], phones[i], isPinned, avatar);
