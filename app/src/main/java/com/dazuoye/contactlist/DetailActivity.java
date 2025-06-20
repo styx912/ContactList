@@ -306,8 +306,17 @@ public class DetailActivity extends AppCompatActivity {
             String newName = nameInput.getText().toString().trim();
             String newPhone = phoneInput.getText().toString().trim();
 
+            //输入验证
             if (newName.isEmpty() || newPhone.isEmpty()) {
                 Toast.makeText(DetailActivity.this, "姓名和电话不能为空", Toast.LENGTH_SHORT).show();
+                return;
+            }
+            if (newName.length() < 2) {
+                Toast.makeText(this, "姓名至少需要2个字符", Toast.LENGTH_SHORT).show();
+                return;
+            }
+            if (!newPhone.matches("^1[3-9]\\d{9}$")) { // 简单手机号验证
+                Toast.makeText(this, "请输入有效的手机号码", Toast.LENGTH_SHORT).show();
                 return;
             }
 
