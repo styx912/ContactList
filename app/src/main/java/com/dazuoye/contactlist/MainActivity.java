@@ -1,14 +1,22 @@
 package com.dazuoye.contactlist;
 
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextUtils;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.EditorInfo;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.BaseAdapter;
+import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -28,6 +36,9 @@ public class MainActivity extends AppCompatActivity {
     private List<Contact> contactList = new ArrayList<>();
     private DatabaseHelper dbHelper;
     private ContactAdapter adapter;
+    private EditText searchInput;
+    private Button clearButton;
+    private List<Contact> originalContactList = new ArrayList<>();
 
     // 中文排序比较器
     private final Comparator<Contact> chineseComparator = (c1, c2) -> {
@@ -46,6 +57,8 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        searchInput = findViewById(R.id.searchInput);
+        clearButton = findViewById(R.id.clearButton);
         contactListView = findViewById(R.id.contactListView);
         dbHelper = new DatabaseHelper(this);
 
@@ -65,6 +78,90 @@ public class MainActivity extends AppCompatActivity {
             intent.putExtra("PHONE", selectedContact.getPhone());
             startActivity(intent);
         });
+
+        // 设置搜索监听器
+        setupSearchFunctionality();
+    }
+
+    private void setupSearchFunctionality() {
+        // 文本变化监听
+        searchInput.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                filterContacts(s.toString());
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                clearButton.setVisibility(s.length() > 0 ? View.VISIBLE : View.GONE);
+            }
+        });
+
+        // 清除按钮点击
+        clearButton.setOnClickListener(v -> {
+            searchInput.setText("");
+            filterContacts("");
+            InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+            imm.hideSoftInputFromWindow(searchInput.getWindowToken(), 0);
+        });
+
+        // 键盘搜索按钮监听
+        searchInput.setOnEditorActionListener((v, actionId, event) -> {
+            if (actionId == EditorInfo.IME_ACTION_SEARCH) {
+                InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+                imm.hideSoftInputFromWindow(searchInput.getWindowToken(), 0);
+                return true;
+            }
+            return false;
+        });
+    }
+
+    private void filterContacts(String query) {
+        if (originalContactList.isEmpty()) {
+            originalContactList.addAll(contactList);
+        }
+
+        contactList.clear();
+
+        if (TextUtils.isEmpty(query)) {
+            contactList.addAll(originalContactList);
+        } else {
+            String lowerQuery = query.toLowerCase(Locale.getDefault());
+            for (Contact contact : originalContactList) {
+                if (contact.getName().toLowerCase(Locale.getDefault()).contains(lowerQuery) ||
+                        contact.getPhone().contains(query)) {
+                    contactList.add(contact);
+                }
+            }
+        }
+
+        // 重新排序（保留置顶功能）
+        Collections.sort(contactList, chineseComparator);
+        adapter.notifyDataSetChanged();
+    }
+
+    private void loadContacts() {
+        // 清空原始列表以确保数据最新
+        originalContactList.clear();
+
+        contactList.clear();
+        contactList.addAll(dbHelper.getAllContacts());
+        originalContactList.addAll(contactList); // 保存原始列表
+
+        Collections.sort(contactList, chineseComparator);
+        // ... 其他代码不变 ...
+    }
+
+    // 修改refreshContacts方法
+    private void refreshContacts() {
+        originalContactList.clear(); // 清空缓存
+        loadContacts();
+        if (adapter != null) {
+            adapter.notifyDataSetChanged();
+        }
     }
 
     private void initializeDatabase() {
@@ -77,7 +174,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void addTestContacts() {
-        String[] names = {"安哲平", "孙笑川", "侯国玉", "丁真", "方向成", "高玉波", "黄绍轩", "金成武","孔惟桢","李俊真","马玉琦","周振杰"};
+        String[] names = {"安哲平", "孙笑川", "侯国玉", "丁真", "方向成", "高玉波", "Paul", "Alice","Samara","Bob","Lawrence","Carpenter"};
         String[] phones = {
                 "13800138000", "13900139000", "13700137000",
                 "13600136000", "13500135000", "13400134000",
@@ -102,20 +199,7 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    private void loadContacts() {
-        contactList.clear();
-        contactList.addAll(dbHelper.getAllContacts());
 
-        // 在Java层进行中文排序
-        Collections.sort(contactList, chineseComparator);
-
-        Log.d("Database", "Loaded " + contactList.size() + " contacts");
-
-        // 打印排序后的联系人
-        for (Contact contact : contactList) {
-            Log.d("SortedContacts", contact.getName() + " - " + contact.getPhone());
-        }
-    }
 
     @Override
     protected void onResume() {
@@ -123,12 +207,7 @@ public class MainActivity extends AppCompatActivity {
         refreshContacts();
     }
 
-    private void refreshContacts() {
-        loadContacts();
-        if (adapter != null) {
-            adapter.notifyDataSetChanged();
-        }
-    }
+
 
     // 适配器类
     class ContactAdapter extends BaseAdapter {
