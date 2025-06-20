@@ -34,11 +34,11 @@ import java.util.Random;
 public class MainActivity extends AppCompatActivity {
     private ListView contactListView;
     private List<Contact> contactList = new ArrayList<>();
+    private List<Contact> originalContactList = new ArrayList<>(); // 用于保存原始联系人列表
     private DatabaseHelper dbHelper;
     private ContactAdapter adapter;
     private EditText searchInput;
     private Button clearButton;
-    private List<Contact> originalContactList = new ArrayList<>();
 
     // 中文排序比较器
     private final Comparator<Contact> chineseComparator = (c1, c2) -> {
@@ -57,10 +57,12 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        searchInput = findViewById(R.id.searchInput);
-        clearButton = findViewById(R.id.clearButton);
         contactListView = findViewById(R.id.contactListView);
         dbHelper = new DatabaseHelper(this);
+
+        // 初始化搜索组件
+        searchInput = findViewById(R.id.searchInput);
+        clearButton = findViewById(R.id.clearButton);
 
         // 确保数据库初始化完成
         initializeDatabase();
@@ -79,7 +81,7 @@ public class MainActivity extends AppCompatActivity {
             startActivity(intent);
         });
 
-        // 设置搜索监听器
+        // 设置搜索功能
         setupSearchFunctionality();
     }
 
@@ -104,6 +106,7 @@ public class MainActivity extends AppCompatActivity {
         clearButton.setOnClickListener(v -> {
             searchInput.setText("");
             filterContacts("");
+            // 隐藏键盘
             InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
             imm.hideSoftInputFromWindow(searchInput.getWindowToken(), 0);
         });
@@ -111,6 +114,7 @@ public class MainActivity extends AppCompatActivity {
         // 键盘搜索按钮监听
         searchInput.setOnEditorActionListener((v, actionId, event) -> {
             if (actionId == EditorInfo.IME_ACTION_SEARCH) {
+                // 隐藏键盘
                 InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
                 imm.hideSoftInputFromWindow(searchInput.getWindowToken(), 0);
                 return true;
@@ -120,16 +124,14 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void filterContacts(String query) {
-        if (originalContactList.isEmpty()) {
-            originalContactList.addAll(contactList);
-        }
-
         contactList.clear();
 
         if (TextUtils.isEmpty(query)) {
+            // 如果搜索框为空，显示所有联系人
             contactList.addAll(originalContactList);
         } else {
             String lowerQuery = query.toLowerCase(Locale.getDefault());
+            // 过滤联系人：姓名或电话包含搜索内容
             for (Contact contact : originalContactList) {
                 if (contact.getName().toLowerCase(Locale.getDefault()).contains(lowerQuery) ||
                         contact.getPhone().contains(query)) {
@@ -143,27 +145,6 @@ public class MainActivity extends AppCompatActivity {
         adapter.notifyDataSetChanged();
     }
 
-    private void loadContacts() {
-        // 清空原始列表以确保数据最新
-        originalContactList.clear();
-
-        contactList.clear();
-        contactList.addAll(dbHelper.getAllContacts());
-        originalContactList.addAll(contactList); // 保存原始列表
-
-        Collections.sort(contactList, chineseComparator);
-        // ... 其他代码不变 ...
-    }
-
-    // 修改refreshContacts方法
-    private void refreshContacts() {
-        originalContactList.clear(); // 清空缓存
-        loadContacts();
-        if (adapter != null) {
-            adapter.notifyDataSetChanged();
-        }
-    }
-
     private void initializeDatabase() {
         // 如果数据库为空，添加测试数据
         if (dbHelper.getAllContacts().isEmpty()) {
@@ -174,13 +155,15 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void addTestContacts() {
-        String[] names = {"安哲平", "孙笑川", "侯国玉", "丁真", "方向成", "高玉波", "Paul", "Alice","Samara","Bob","Lawrence","Carpenter"};
-        String[] phones = {
-                "13800138000", "13900139000", "13700137000",
-                "13600136000", "13500135000", "13400134000",
-                "13300133000", "13200132000", "14521458965",
-                "14785236987", "12365478541", "15995874521"
-        };
+        String[] names = { "安哲平", "孙笑川", "侯国玉", "丁真", "方向成", "高玉波",
+                           "Paul", "Alice","Samara","Bob","Lawrence","Carpenter"
+                         };
+
+        String[] phones = { "13800138000", "13900139000", "13700137000",
+                            "13600136000", "13500135000", "13400134000",
+                            "13300133000", "13200132000", "14521458965",
+                            "14785236987", "12365478541", "15995874521"
+                          };
 
         String avatars = "android.resource://" + getPackageName() + "/" + R.drawable.ic_person1;
 
@@ -199,7 +182,26 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    private void loadContacts() {
+        // 清空列表
+        contactList.clear();
+        originalContactList.clear();
 
+        // 从数据库加载联系人
+        List<Contact> dbContacts = dbHelper.getAllContacts();
+        contactList.addAll(dbContacts);
+        originalContactList.addAll(dbContacts); // 保存原始列表
+
+        // 在Java层进行中文排序
+        Collections.sort(contactList, chineseComparator);
+
+        Log.d("Database", "Loaded " + contactList.size() + " contacts");
+
+        // 打印排序后的联系人
+        for (Contact contact : contactList) {
+            Log.d("SortedContacts", contact.getName() + " - " + contact.getPhone());
+        }
+    }
 
     @Override
     protected void onResume() {
@@ -207,7 +209,12 @@ public class MainActivity extends AppCompatActivity {
         refreshContacts();
     }
 
-
+    private void refreshContacts() {
+        loadContacts();
+        if (adapter != null) {
+            adapter.notifyDataSetChanged();
+        }
+    }
 
     // 适配器类
     class ContactAdapter extends BaseAdapter {
