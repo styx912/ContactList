@@ -137,7 +137,10 @@ public class DetailActivity extends AppCompatActivity {
         final int[] presetAvatars = {
                 R.drawable.ic_person2,
                 R.drawable.ic_person3,
-                R.drawable.ic_person4
+                R.drawable.ic_person4,
+                R.drawable.ic_person5,
+                R.drawable.ic_person6,
+                R.drawable.ic_person7
         };
 
         // 使用GridView展示头像
