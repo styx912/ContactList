@@ -1,23 +1,54 @@
 package com.dazuoye.contactlist;
 
+import android.Manifest;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
+import android.provider.MediaStore;
 import android.text.InputType;
 import android.view.View;
+import android.view.ViewGroup;
+import android.widget.ArrayAdapter;
+import android.widget.BaseAdapter;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.GridView;
+import android.widget.ImageView;
+import android.widget.ListAdapter;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 
 public class DetailActivity extends AppCompatActivity {
     private String originalName;
     private String originalPhone;
     private DatabaseHelper dbHelper;
+    private static final int PICK_IMAGE_REQUEST = 1;
+    private static final int TAKE_PHOTO_REQUEST = 2;
+    private long contactId;
+    private static final int REQUEST_CAMERA_PERMISSION = 100;
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode,
+                                           @NonNull String[] permissions,
+                                           @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (requestCode == REQUEST_CAMERA_PERMISSION) {
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                launchCamera();
+            } else {
+                Toast.makeText(this, "需要相机权限", Toast.LENGTH_SHORT).show();
+            }
+        }
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -26,15 +57,44 @@ public class DetailActivity extends AppCompatActivity {
 
         TextView detailName = findViewById(R.id.detailName);
         TextView detailPhone = findViewById(R.id.detailPhone);
+        ImageView detailAvatar = findViewById(R.id.detailAvatar);
         dbHelper = new DatabaseHelper(this);
 
         // 获取传递过来的数据
         originalName = getIntent().getStringExtra("NAME");
         originalPhone = getIntent().getStringExtra("PHONE");
+        contactId = getIntent().getLongExtra("CONTACT_ID", -1);
+        Contact contact = dbHelper.getContactById(contactId);
 
-        // 设置界面内容
-        detailName.setText(originalName);
-        detailPhone.setText(originalPhone);
+        if (contact != null) {
+            // 设置界面内容
+            originalName = contact.getName();
+            originalPhone = contact.getPhone();
+            detailName.setText(originalName);
+            detailPhone.setText(originalPhone);
+
+            // 设置头像
+            String avatarUri = contact.getAvatarUri();
+            if (avatarUri != null && !avatarUri.isEmpty()) {
+                if (avatarUri.startsWith("android.resource")) {
+                    int resId = getResources().getIdentifier(
+                            avatarUri.substring(avatarUri.lastIndexOf('/') + 1),
+                            "drawable", getPackageName());
+                    detailAvatar.setImageResource(resId);
+                } else {
+                    detailAvatar.setImageURI(Uri.parse(avatarUri));
+                }
+            } else {
+                detailAvatar.setImageResource(R.drawable.ic_person1);
+            }
+        } else {
+            // 回退方案：使用Intent传递的数据
+            originalName = getIntent().getStringExtra("NAME");
+            originalPhone = getIntent().getStringExtra("PHONE");
+            detailName.setText(originalName);
+            detailPhone.setText(originalPhone);
+            detailAvatar.setImageResource(R.drawable.ic_person1);
+        }
 
         // 拨打按钮
         Button callButton = findViewById(R.id.callButton);
@@ -51,8 +111,181 @@ public class DetailActivity extends AppCompatActivity {
         // 删除按钮
         Button deleteButton = findViewById(R.id.deleteButton);
         deleteButton.setOnClickListener(v -> showDeleteConfirmation());
+
+        //修改联系人头像
+        ImageView avatar = findViewById(R.id.detailAvatar);
+        avatar.setOnClickListener(v -> showAvatarOptions());
     }
 
+
+    //修改头像选项
+    private void showAvatarOptions() {
+        CharSequence[] options = {"从预设中选择", "拍照", "从相册选择", "取消"};
+
+        new AlertDialog.Builder(this)
+                .setTitle("更换头像")
+                .setItems(options, (dialog, which) -> {
+                    if (which == 0) showPresetAvatars();
+                    else if (which == 1) takePhoto();
+                    else if (which == 2) pickImage();
+                })
+                .show();
+    }
+
+    private void showPresetAvatars() {
+        // 获取所有预设头像
+        final int[] presetAvatars = {
+                R.drawable.ic_person2,
+                R.drawable.ic_person3,
+                R.drawable.ic_person4
+        };
+
+        // 使用GridView展示头像
+        GridView gridView = new GridView(this);
+        gridView.setNumColumns(3); // 每行显示3个头像
+
+        // 设置适配器
+        BaseAdapter adapter = new BaseAdapter() {
+            @Override
+            public int getCount() {
+                return presetAvatars.length;
+            }
+
+            @Override
+            public Object getItem(int position) {
+                return presetAvatars[position];
+            }
+
+            @Override
+            public long getItemId(int position) {
+                return position;
+            }
+
+            @Override
+            public View getView(int position, View convertView, ViewGroup parent) {
+                ImageView imageView;
+                if (convertView == null) {
+                    imageView = new ImageView(DetailActivity.this);
+                    imageView.setLayoutParams(new GridView.LayoutParams(200, 200)); // 设置大小
+                    imageView.setScaleType(ImageView.ScaleType.CENTER_CROP);
+                    imageView.setPadding(8, 8, 8, 8);
+
+                } else {
+                    imageView = (ImageView) convertView;
+                }
+
+                // 设置头像资源
+                imageView.setImageResource(presetAvatars[position]);
+                return imageView;
+            }
+        };
+
+        gridView.setAdapter(adapter);
+
+        // 创建对话框
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("选择预设头像")
+                .setView(gridView)
+                .setNegativeButton("取消", null);
+
+        final AlertDialog dialog = builder.create();
+
+        // 设置头像点击事件
+        gridView.setOnItemClickListener((parent, view, position, id) -> {
+            String uri = "android.resource://" + getPackageName() + "/" + presetAvatars[position];
+            updateAvatar(uri);
+            dialog.dismiss(); // 关闭对话框
+        });
+
+        dialog.show();
+    }
+
+    private void takePhoto() {
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA)
+                != PackageManager.PERMISSION_GRANTED) {
+
+            ActivityCompat.requestPermissions(
+                    this,
+                    new String[]{Manifest.permission.CAMERA},
+                    REQUEST_CAMERA_PERMISSION
+            );
+        } else {
+            launchCamera();
+        }
+    }
+
+    private void launchCamera() {
+        Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+        if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
+            startActivityForResult(takePictureIntent, TAKE_PHOTO_REQUEST);
+        }
+    }
+
+    private void pickImage() {
+        Intent intent = new Intent(Intent.ACTION_PICK);
+        intent.setType("image/*");
+        startActivityForResult(intent, PICK_IMAGE_REQUEST);
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if (resultCode == RESULT_OK) {
+            if (requestCode == PICK_IMAGE_REQUEST && data != null) {
+                Uri selectedImage = data.getData();
+                processSelectedImage(selectedImage);
+            } else if (requestCode == TAKE_PHOTO_REQUEST && data != null) {
+                Bundle extras = data.getExtras();
+                Bitmap imageBitmap = (Bitmap) extras.get("data");
+                processCapturedImage(imageBitmap);
+            }
+        }
+    }
+
+    private void processSelectedImage(Uri imageUri) {
+        Bitmap bitmap = ImageUtils.getBitmapFromUri(this, imageUri);
+        if (bitmap != null) {
+            Bitmap circleBitmap = ImageUtils.getCircleBitmap(bitmap);
+            String savedUri = ImageUtils.saveImage(this, circleBitmap, String.valueOf(contactId));
+            if (savedUri != null) {
+                updateAvatar(savedUri);
+            }
+        }
+    }
+
+    private void processCapturedImage(Bitmap bitmap) {
+        if (bitmap != null) {
+            Bitmap circleBitmap = ImageUtils.getCircleBitmap(bitmap);
+            String savedUri = ImageUtils.saveImage(this, circleBitmap, String.valueOf(contactId));
+            if (savedUri != null) {
+                updateAvatar(savedUri);
+            }
+        }
+    }
+
+    private void updateAvatar(String avatarUri) {
+        // 更新数据库
+        boolean success = dbHelper.updateAvatar(contactId, avatarUri);
+
+        if (success) {
+            // 更新UI
+            ImageView avatar = findViewById(R.id.detailAvatar);
+            if (avatarUri.startsWith("android.resource")) {
+                int resId = getResources().getIdentifier(
+                        avatarUri.substring(avatarUri.lastIndexOf('/') + 1),
+                        "drawable", getPackageName());
+                avatar.setImageResource(resId);
+            } else {
+                avatar.setImageURI(Uri.parse(avatarUri));
+            }
+            Toast.makeText(this, "头像已更新", Toast.LENGTH_SHORT).show();
+        } else {
+            Toast.makeText(this, "更新失败", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    //修改联系人方法
     private void showEditDialog() {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle("修改联系人");
@@ -102,6 +335,8 @@ public class DetailActivity extends AppCompatActivity {
         builder.show();
     }
 
+
+    //确认删除联系人提示信息
     private void showDeleteConfirmation() {
         new AlertDialog.Builder(this)
                 .setTitle("删除联系人")

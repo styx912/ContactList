@@ -2,6 +2,7 @@ package com.dazuoye.contactlist;
 
 import android.content.Intent;
 import android.graphics.Color;
+import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -59,6 +60,7 @@ public class MainActivity extends AppCompatActivity {
         contactListView.setOnItemClickListener((parent, view, position, id) -> {
             Contact selectedContact = contactList.get(position);
             Intent intent = new Intent(MainActivity.this, DetailActivity.class);
+            intent.putExtra("CONTACT_ID", selectedContact.getId());
             intent.putExtra("NAME", selectedContact.getName());
             intent.putExtra("PHONE", selectedContact.getPhone());
             startActivity(intent);
@@ -82,12 +84,24 @@ public class MainActivity extends AppCompatActivity {
                 "13300133000", "13200132000", "14521458965",
                 "14785236987", "12365478541", "15995874521"
         };
+        String[] avatars = {
+                "android.resource://" + getPackageName() + "/" + R.drawable.ic_person1,
+                "android.resource://" + getPackageName() + "/" + R.drawable.ic_person2,
+                "android.resource://" + getPackageName() + "/" + R.drawable.ic_person3,
+                "android.resource://" + getPackageName() + "/" + R.drawable.ic_person4
+        };
 
         // 随机设置一些联系人置顶
         Random random = new Random();
         for (int i = 0; i < names.length; i++) {
-            boolean isPinned = random.nextBoolean(); // 随机置顶状态
-            Contact contact = new Contact(0, names[i], phones[i], isPinned);
+            // 随机生成置顶状态
+            boolean isPinned = random.nextBoolean();
+
+            // 预设头像
+            String avatar = avatars[0];
+
+            // 创建联系人对象
+            Contact contact = new Contact(0, names[i], phones[i], isPinned, avatar);
             dbHelper.addContact(contact);
         }
     }
@@ -153,6 +167,24 @@ public class MainActivity extends AppCompatActivity {
             }
 
             Contact contact = contactList.get(position);
+
+            // 设置头像
+            String avatarUri = contact.getAvatarUri();
+            if (avatarUri != null && !avatarUri.isEmpty()) {
+                if (avatarUri.startsWith("android.resource")) {
+                    // 预设头像
+                    int resId = getResources().getIdentifier(
+                            avatarUri.substring(avatarUri.lastIndexOf('/') + 1),
+                            "drawable", getPackageName());
+                    holder.avatar.setImageResource(resId);
+                } else {
+                    // 自定义头像
+                    holder.avatar.setImageURI(Uri.parse(avatarUri));
+                }
+            } else {
+                // 默认头像
+                holder.avatar.setImageResource(R.drawable.ic_person1);
+            }
 
             // 设置文本内容
             holder.name.setText(contact.getName());

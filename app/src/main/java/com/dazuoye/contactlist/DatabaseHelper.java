@@ -13,7 +13,7 @@ import java.util.List;
 
 public class DatabaseHelper extends SQLiteOpenHelper {
     private static final String DATABASE_NAME = "contacts.db";
-    private static final int DATABASE_VERSION = 4;
+    private static final int DATABASE_VERSION = 5;
 
     // 表名和列名（统一管理）
     public static final String TABLE_CONTACTS = "contacts";
@@ -21,6 +21,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     public static final String COLUMN_NAME = "name";
     public static final String COLUMN_PHONE = "phone";
     public static final String COLUMN_IS_PINNED = "is_pinned";
+    public static final String COLUMN_AVATAR_URI = "avatar_uri";
 
     // 预定义所有列
     private static final String[] ALL_COLUMNS = {
@@ -64,20 +65,27 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-        if (oldVersion < 4) {
+        if (oldVersion < 5) { // 升级到版本5
             try {
-                // 尝试直接添加列（若失败则重建表）
-                db.execSQL("ALTER TABLE " + TABLE_CONTACTS + " ADD COLUMN " + COLUMN_IS_PINNED + " INTEGER DEFAULT 0");
-                Log.d("DatabaseHelper", "Added pinned column");
+                db.execSQL("ALTER TABLE " + TABLE_CONTACTS + " ADD COLUMN " + COLUMN_AVATAR_URI + " TEXT");
             } catch (SQLiteException e) {
-                // 列已存在或发生其他错误，重建表
-                db.execSQL("DROP TABLE IF EXISTS " + TABLE_CONTACTS);
-                onCreate(db);
-                Log.d("DatabaseHelper", "Recreated table with pinned column");
+                // 处理异常
             }
         }
     }
 
+    // 创建表语句（私有常量）
+    private static final String CREATE_TABLE =
+            "CREATE TABLE " + TABLE_CONTACTS + "(" +
+                    COLUMN_ID + " INTEGER PRIMARY KEY AUTOINCREMENT," +
+                    COLUMN_NAME + " TEXT NOT NULL," +
+                    COLUMN_PHONE + " TEXT NOT NULL," +
+                    COLUMN_IS_PINNED + " INTEGER DEFAULT 0," +
+                    COLUMN_AVATAR_URI + " TEXT)";
+
+
+
+//--------------------------------------------------------------------
     // 添加联系人
     public void addContact(Contact contact) {
         try (SQLiteDatabase db = getWritableDatabase()) {
@@ -85,6 +93,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             values.put(COLUMN_NAME, contact.getName());
             values.put(COLUMN_PHONE, contact.getPhone());
             values.put(COLUMN_IS_PINNED, contact.isPinned() ? 1 : 0);
+            values.put(COLUMN_AVATAR_URI, contact.getAvatarUri());
             db.insert(TABLE_CONTACTS, null, values);
             Log.d("DatabaseHelper", "Contact added: " + contact.getName());
         }
@@ -115,7 +124,9 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     // 获取所有联系人
     public List<Contact> getAllContacts() {
         List<Contact> contacts = new ArrayList<>();
-        String[] columns = hasPinnedColumn ? ALL_COLUMNS : new String[]{COLUMN_ID, COLUMN_NAME, COLUMN_PHONE};
+        String[] columns = hasPinnedColumn ?
+                new String[]{COLUMN_ID, COLUMN_NAME, COLUMN_PHONE, COLUMN_IS_PINNED, COLUMN_AVATAR_URI} :
+                new String[]{COLUMN_ID, COLUMN_NAME, COLUMN_PHONE, COLUMN_AVATAR_URI};
 
         try (SQLiteDatabase db = getReadableDatabase();
              Cursor cursor = db.query(TABLE_CONTACTS, columns, null, null, null, null, null)) {
@@ -126,14 +137,38 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                     String name = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_NAME));
                     String phone = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_PHONE));
                     boolean isPinned = hasPinnedColumn && cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_IS_PINNED)) == 1;
+                    String avatarUri = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_AVATAR_URI));
 
-                    contacts.add(new Contact(id, name, phone, isPinned));
+                    contacts.add(new Contact(id, name, phone, isPinned,avatarUri));
                 } while (cursor.moveToNext());
             }
         } catch (Exception e) {
             Log.e("DatabaseHelper", "Error getting contacts", e);
         }
         return contacts;
+    }
+
+    public Contact getContactById(long id) {
+        SQLiteDatabase db = getReadableDatabase();
+        Contact contact = null;
+
+        Cursor cursor = db.query(TABLE_CONTACTS,
+                new String[]{COLUMN_ID, COLUMN_NAME, COLUMN_PHONE, COLUMN_IS_PINNED, COLUMN_AVATAR_URI},
+                COLUMN_ID + " = ?",
+                new String[]{String.valueOf(id)},
+                null, null, null);
+
+        if (cursor != null && cursor.moveToFirst()) {
+            contact = new Contact(
+                    cursor.getLong(cursor.getColumnIndexOrThrow(COLUMN_ID)),
+                    cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_NAME)),
+                    cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_PHONE)),
+                    cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_IS_PINNED)) == 1,
+                    cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_AVATAR_URI))
+            );
+            cursor.close();
+        }
+        return contact;
     }
 
     // 切换置顶状态
@@ -148,11 +183,14 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         }
     }
 
-    // 创建表语句（私有常量）
-    private static final String CREATE_TABLE =
-            "CREATE TABLE " + TABLE_CONTACTS + "(" +
-                    COLUMN_ID + " INTEGER PRIMARY KEY AUTOINCREMENT," +
-                    COLUMN_NAME + " TEXT NOT NULL," +
-                    COLUMN_PHONE + " TEXT NOT NULL," +
-                    COLUMN_IS_PINNED + " INTEGER DEFAULT 0)";
+    // 更新头像
+    public boolean updateAvatar(long contactId, String avatarUri) {
+        try (SQLiteDatabase db = getWritableDatabase()) {
+            ContentValues values = new ContentValues();
+            values.put(COLUMN_AVATAR_URI, avatarUri);
+            return db.update(TABLE_CONTACTS, values,
+                    COLUMN_ID + " = ?",
+                    new String[]{String.valueOf(contactId)}) > 0;
+        }
+    }
 }
