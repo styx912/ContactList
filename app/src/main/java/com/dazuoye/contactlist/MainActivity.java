@@ -30,7 +30,7 @@ import java.util.Random;
 
 public class MainActivity extends AppCompatActivity {
     private final List<Contact> contactList = new ArrayList<>();
-    private final List<Contact> originalContactList = new ArrayList<>(); // 用于保存原始联系人列表
+    private final List<Contact> originalContactList = new ArrayList<>(); // 保存完整的原始联系人列表（用于搜索时恢复）
     private DatabaseHelper dbHelper;
     private ContactAdapter adapter;
     private EditText searchInput;
@@ -101,7 +101,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void setupSearchFunctionality() {
-        // 文本变化监听
+        // 文本变化监听，输入变化时触发过滤，实时过滤联系人
         searchInput.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
@@ -224,9 +224,9 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void refreshContacts() {
-        loadContacts();
+        loadContacts();  // 重载数据库数据
         if (adapter != null) {
-            adapter.notifyDataSetChanged();
+            adapter.notifyDataSetChanged();  // 更新UI
         }
     }
 
