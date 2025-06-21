@@ -3,11 +3,11 @@ package com.dazuoye.contactlist;
 import androidx.annotation.NonNull;
 
 public class Contact {
-    private long id;
+    private final long id;
     private String name;
-    private String phone;
+    private final String phone;
     private boolean isPinned;    //置顶
-    private String avatarUri;   //头像URI字段
+    private final String avatarUri;   //头像URI字段
 
     public Contact(long id, String name, String phone, boolean isPinned, String avatarUri) {
         this.id = id;
