@@ -193,7 +193,7 @@ public class MainActivity extends AppCompatActivity {
         originalContactList.addAll(dbContacts); // 保存原始列表
 
         // 在Java层进行中文排序
-        Collections.sort(contactList, chineseComparator);
+        contactList.sort(chineseComparator);
 
         Log.d("Database", "Loaded " + contactList.size() + " contacts");
 
