@@ -17,7 +17,7 @@
         <EditText
             android:id="@+id/searchInput"
             android:layout_width="0dp"
-            android:layout_height="40dp"
+            android:layout_height="48dp"
             android:layout_weight="1"
             android:hint="搜索联系人"
             android:inputType="text"
@@ -27,7 +27,8 @@
             android:singleLine="true"
             android:drawableStart="@drawable/ic_search"
             android:drawablePadding="8dp"
-            android:background="@drawable/search_background"/>
+            android:background="@drawable/search_background"
+            android:minHeight="48dp"/> <!-- 显式声明最小高度 -->
 
         <Button
             android:id="@+id/clearButton"
