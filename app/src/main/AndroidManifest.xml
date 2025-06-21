@@ -22,6 +22,9 @@
             </intent-filter>
         </activity>
         <activity android:name=".DetailActivity" />
+        <activity
+            android:name=".AddContactActivity"
+            android:theme="@style/Theme.AppCompat.Light.NoActionBar" />
     </application>
 
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
