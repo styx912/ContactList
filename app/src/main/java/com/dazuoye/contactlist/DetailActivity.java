@@ -1,7 +1,6 @@
 package com.dazuoye.contactlist;
 
 import android.Manifest;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
@@ -11,13 +10,11 @@ import android.provider.MediaStore;
 import android.text.InputType;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ArrayAdapter;
 import android.widget.BaseAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.GridView;
 import android.widget.ImageView;
-import android.widget.ListAdapter;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -240,6 +237,7 @@ public class DetailActivity extends AppCompatActivity {
                 processSelectedImage(selectedImage);
             } else if (requestCode == TAKE_PHOTO_REQUEST && data != null) {
                 Bundle extras = data.getExtras();
+                assert extras != null;
                 Bitmap imageBitmap = (Bitmap) extras.get("data");
                 processCapturedImage(imageBitmap);
             }

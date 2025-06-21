@@ -23,11 +23,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     public static final String COLUMN_IS_PINNED = "is_pinned";
     public static final String COLUMN_AVATAR_URI = "avatar_uri";
 
-    // 预定义所有列
-    private static final String[] ALL_COLUMNS = {
-            COLUMN_ID, COLUMN_NAME, COLUMN_PHONE, COLUMN_IS_PINNED
-    };
-
     // 缓存列存在性状态（通过构造函数初始化）
     private boolean hasPinnedColumn = false;
 
@@ -172,14 +167,14 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     }
 
     // 切换置顶状态
-    public boolean togglePinnedStatus(long contactId, boolean isPinned) {
+    public void togglePinnedStatus(long contactId, boolean isPinned) {
         try (SQLiteDatabase db = getWritableDatabase()) {
             ContentValues values = new ContentValues();
             values.put(COLUMN_IS_PINNED, isPinned ? 1 : 0);
 
-            return db.update(TABLE_CONTACTS, values,
+            db.update(TABLE_CONTACTS, values,
                     COLUMN_ID + " = ?",
-                    new String[]{String.valueOf(contactId)}) > 0;
+                    new String[]{String.valueOf(contactId)});
         }
     }
 

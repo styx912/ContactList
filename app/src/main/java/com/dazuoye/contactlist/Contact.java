@@ -1,5 +1,7 @@
 package com.dazuoye.contactlist;
 
+import androidx.annotation.NonNull;
+
 public class Contact {
     private long id;
     private String name;
@@ -29,6 +31,7 @@ public class Contact {
     public void setPinned(boolean pinned) { isPinned = pinned; }
     public void setAvatarUri(String avatarUri) { this.avatarUri = avatarUri; }
 
+    @NonNull
     @Override
     public String toString() {
         return name + " (" + phone + ")";

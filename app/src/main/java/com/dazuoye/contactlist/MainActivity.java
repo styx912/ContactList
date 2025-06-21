@@ -2,7 +2,6 @@ package com.dazuoye.contactlist;
 
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
 import android.text.Editable;
@@ -25,7 +24,6 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import java.text.Collator;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
