@@ -1,47 +1,69 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
+<RelativeLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:orientation="vertical">
+    android:layout_height="match_parent">
 
-    <!-- 搜索框 -->
+    <!-- 原来的LinearLayout内容 -->
     <LinearLayout
+        android:id="@+id/main_content"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:padding="12dp"
-        android:background="#FFF"
-        android:elevation="2dp">
+        android:layout_height="match_parent"
+        android:orientation="vertical">
 
-        <EditText
-            android:id="@+id/searchInput"
-            android:layout_width="0dp"
-            android:layout_height="48dp"
-            android:layout_weight="1"
-            android:hint="搜索联系人"
-            android:inputType="text"
-            android:imeOptions="actionSearch"
-            android:paddingStart="16dp"
-            android:paddingEnd="16dp"
-            android:singleLine="true"
-            android:drawableStart="@drawable/ic_search"
-            android:drawablePadding="8dp"
-            android:background="@drawable/search_background"
-            android:minHeight="48dp"/> <!-- 显式声明最小高度 -->
-
-        <Button
-            android:id="@+id/clearButton"
-            android:layout_width="wrap_content"
+        <!-- 搜索框 -->
+        <LinearLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="取消"
-            android:textColor="#FF4081"
-            android:background="@android:color/transparent"
-            android:visibility="gone"/>
+            android:orientation="horizontal"
+            android:padding="12dp"
+            android:background="#FFF"
+            android:elevation="2dp">
+
+            <EditText
+                android:id="@+id/searchInput"
+                android:layout_width="0dp"
+                android:layout_height="48dp"
+                android:layout_weight="1"
+                android:hint="搜索联系人"
+                android:inputType="text"
+                android:imeOptions="actionSearch"
+                android:paddingStart="16dp"
+                android:paddingEnd="16dp"
+                android:singleLine="true"
+                android:drawableStart="@drawable/ic_search"
+                android:drawablePadding="8dp"
+                android:background="@drawable/search_background"
+                android:minHeight="48dp"/>
+
+            <Button
+                android:id="@+id/clearButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="取消"
+                android:textSize="18sp"
+                android:textColor="#FF4081"
+                android:background="@android:color/transparent"
+                android:visibility="gone"/>
+        </LinearLayout>
+
+        <ListView
+            android:id="@+id/contactListView"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"/>
     </LinearLayout>
 
-    <ListView
-        android:id="@+id/contactListView"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"/>
-</LinearLayout>
+    <!-- 添加联系人按钮 -->
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/fab_add"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentEnd="true"
+        android:layout_margin="16dp"
+        android:src="@drawable/ic_add"
+        android:contentDescription="添加联系人"
+        app:backgroundTint="#2196F3"
+        app:tint="#FFFFFF"/>
+</RelativeLayout>
