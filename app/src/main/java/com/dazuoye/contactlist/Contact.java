@@ -25,11 +25,8 @@ public class Contact {
     public String getAvatarUri() { return avatarUri; }
 
     // Setter方法
-    public void setId(long id) { this.id = id; }
     public void setName(String name) { this.name = name; }
-    public void setPhone(String phone) { this.phone = phone; }
     public void setPinned(boolean pinned) { isPinned = pinned; }
-    public void setAvatarUri(String avatarUri) { this.avatarUri = avatarUri; }
 
     @NonNull
     @Override
