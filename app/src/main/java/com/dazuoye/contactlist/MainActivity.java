@@ -19,9 +19,8 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
-
 import androidx.appcompat.app.AppCompatActivity;
-
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import java.text.Collator;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -36,6 +35,9 @@ public class MainActivity extends AppCompatActivity {
     private ContactAdapter adapter;
     private EditText searchInput;
     private Button clearButton;
+
+    // 添加请求码常量
+    private static final int REQUEST_ADD_CONTACT = 100;
 
     // 中文排序比较器
     private final Comparator<Contact> chineseComparator = (c1, c2) -> {
@@ -80,6 +82,22 @@ public class MainActivity extends AppCompatActivity {
 
         // 设置搜索功能
         setupSearchFunctionality();
+
+        // 添加联系人按钮
+        FloatingActionButton fabAdd = findViewById(R.id.fab_add);
+        fabAdd.setOnClickListener(v -> {
+            Intent intent = new Intent(MainActivity.this, AddContactActivity.class);
+            startActivityForResult(intent, REQUEST_ADD_CONTACT);
+        });
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == REQUEST_ADD_CONTACT && resultCode == RESULT_OK) {
+            // 刷新联系人列表
+            refreshContacts();
+        }
     }
 
     private void setupSearchFunctionality() {
@@ -152,11 +170,13 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void addTestContacts() {
-        String[] names = { "安哲平", "孙笑川", "侯国玉", "丁真", "方向成", "高玉波",
+        String[] names = {
+                           "安哲平", "孙笑川", "侯国玉", "丁真", "方向成", "高玉波",
                            "Paul", "Alice","Samara","Bob","Lawrence","Carpenter"
                          };
 
-        String[] phones = { "13800138000", "13900139000", "13700137000",
+        String[] phones = {
+                            "13800138000", "13900139000", "13700137000",
                             "13600136000", "13500135000", "13400134000",
                             "13300133000", "13200132000", "14521458965",
                             "14785236987", "12365478541", "15995874521"
