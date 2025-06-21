@@ -165,7 +165,7 @@ public class MainActivity extends AppCompatActivity {
                             "14785236987", "12365478541", "15995874521"
                           };
 
-        String avatars = "android.resource://" + getPackageName() + "/" + R.drawable.ic_person1;
+        String avatar = "android.resource://" + getPackageName() + "/" + R.drawable.ic_person1;
 
         // 随机设置一些联系人置顶
         Random random = new Random();
@@ -173,10 +173,7 @@ public class MainActivity extends AppCompatActivity {
             // 随机生成置顶状态
             boolean isPinned = random.nextBoolean();
 
-            // 预设头像
-            String avatar = avatars;
-
-            // 创建联系人对象
+            // 创建联系人对象并预设头像
             Contact contact = new Contact(0, names[i], phones[i], isPinned, avatar);
             dbHelper.addContact(contact);
         }
