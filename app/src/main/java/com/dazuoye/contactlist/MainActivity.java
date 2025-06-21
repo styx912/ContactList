@@ -32,9 +32,8 @@ import java.util.Locale;
 import java.util.Random;
 
 public class MainActivity extends AppCompatActivity {
-    private ListView contactListView;
-    private List<Contact> contactList = new ArrayList<>();
-    private List<Contact> originalContactList = new ArrayList<>(); // 用于保存原始联系人列表
+    private final List<Contact> contactList = new ArrayList<>();
+    private final List<Contact> originalContactList = new ArrayList<>(); // 用于保存原始联系人列表
     private DatabaseHelper dbHelper;
     private ContactAdapter adapter;
     private EditText searchInput;
@@ -57,7 +56,7 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        contactListView = findViewById(R.id.contactListView);
+        ListView contactListView = findViewById(R.id.contactListView);
         dbHelper = new DatabaseHelper(this);
 
         // 初始化搜索组件
