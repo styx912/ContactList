@@ -141,7 +141,7 @@ public class MainActivity extends AppCompatActivity {
         }
 
         // 重新排序（保留置顶功能）
-        Collections.sort(contactList, chineseComparator);
+        contactList.sort(chineseComparator);
         adapter.notifyDataSetChanged();
     }
 
