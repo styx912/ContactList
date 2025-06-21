@@ -12,6 +12,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class DatabaseHelper extends SQLiteOpenHelper {
+    //数据库配置
     private static final String DATABASE_NAME = "contacts.db";
     private static final int DATABASE_VERSION = 5;
 
@@ -23,19 +24,18 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     public static final String COLUMN_IS_PINNED = "is_pinned";
     public static final String COLUMN_AVATAR_URI = "avatar_uri";
 
-    // 缓存列存在性状态（通过构造函数初始化）
+    //默认不置顶
     private boolean hasPinnedColumn = false;
 
+    // 构造函数中检查is_pinned列是否存在
     public DatabaseHelper(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
-        // 初始化时检查列存在性（单次检查）
+
         try (SQLiteDatabase db = getReadableDatabase();
              Cursor cursor = db.rawQuery("PRAGMA table_info(" + TABLE_CONTACTS + ")", null)) {
-
             if (cursor != null) {
-                // 获取 "name" 列的索引（PRAGMA 返回结果的第2列）
                 int nameColumnIndex = cursor.getColumnIndex("name");
-                if (nameColumnIndex != -1) { // 显式检查索引有效性
+                if (nameColumnIndex != -1) {
                     while (cursor.moveToNext()) {
                         String columnName = cursor.getString(nameColumnIndex);
                         if (COLUMN_IS_PINNED.equals(columnName)) {
@@ -54,7 +54,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
     @Override
     public void onCreate(SQLiteDatabase db) {
-        db.execSQL(CREATE_TABLE);
+        db.execSQL(CREATE_TABLE); //创建新表
         Log.d("DatabaseHelper", "Table created successfully");
     }
 
@@ -62,7 +62,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
         if (oldVersion < 5) { // 升级到版本5
             try {
-                db.execSQL("ALTER TABLE " + TABLE_CONTACTS + " ADD COLUMN " + COLUMN_AVATAR_URI + " TEXT");
+                db.execSQL("ALTER TABLE " + TABLE_CONTACTS + " ADD COLUMN " + COLUMN_AVATAR_URI + " TEXT"); // 版本5新增头像字段
             } catch (SQLiteException e) {
                 // 处理异常
             }
@@ -79,8 +79,9 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                     COLUMN_AVATAR_URI + " TEXT)";
 
 
-
 //--------------------------------------------------------------------
+
+
     // 添加联系人
     public void addContact(Contact contact) {
         try (SQLiteDatabase db = getWritableDatabase()) {
@@ -100,10 +101,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             ContentValues values = new ContentValues();
             values.put(COLUMN_NAME, newName);
             values.put(COLUMN_PHONE, newPhone);
-
-            return db.update(TABLE_CONTACTS, values,
-                    COLUMN_NAME + " = ? AND " + COLUMN_PHONE + " = ?",
-                    new String[]{oldName, oldPhone}) > 0;
+            return db.update(TABLE_CONTACTS, values, COLUMN_NAME + " = ? AND " + COLUMN_PHONE + " = ?",
+                    new String[]{oldName, oldPhone}) > 0;  //返回值 > 0 表示至少更新了1条记录
         }
     }
 
@@ -119,8 +118,9 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     // 获取所有联系人
     public List<Contact> getAllContacts() {
         List<Contact> contacts = new ArrayList<>();
-        String[] columns = hasPinnedColumn ?
+        String[] columns = hasPinnedColumn ?    //根据hasPinnedColumn标志决定查询哪些列
                 new String[]{COLUMN_ID, COLUMN_NAME, COLUMN_PHONE, COLUMN_IS_PINNED, COLUMN_AVATAR_URI} :
+                //当is_pinned列存在时：查询所有5个字段（ID、姓名、电话、置顶状态、头像URI）
                 new String[]{COLUMN_ID, COLUMN_NAME, COLUMN_PHONE, COLUMN_AVATAR_URI};
 
         try (SQLiteDatabase db = getReadableDatabase();
