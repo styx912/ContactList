@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="horizontal"
@@ -16,7 +17,7 @@
         android:src="@drawable/ic_person1"
         android:scaleType="centerCrop"
         android:background="@drawable/circle_background"
-        android:layout_marginEnd="16dp"/>
+        android:layout_marginEnd="16dp" />
 
     <!-- 姓名和电话 -->
     <LinearLayout
@@ -31,14 +32,14 @@
             android:layout_height="wrap_content"
             android:textSize="18sp"
             android:textStyle="bold"
-            android:textColor="#DE000000"/>
+            android:textColor="#DE000000" />
 
         <TextView
             android:id="@+id/contactPhone"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:textSize="14sp"
-            android:textColor="#8A000000"/>
+            android:textColor="#8A000000" />
     </LinearLayout>
 
     <ImageView
@@ -47,6 +48,6 @@
         android:layout_height="24dp"
         android:layout_marginStart="16dp"
         android:src="@drawable/ic_favorite_border"
-    android:tint="#FF4081"
-    android:contentDescription="@string/pin_contact"/>
+        android:contentDescription="@string/pin_contact"
+        app:tint="#FF4081" />
 </LinearLayout>
