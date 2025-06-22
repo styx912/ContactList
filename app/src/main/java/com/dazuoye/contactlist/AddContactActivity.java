@@ -63,7 +63,7 @@ public class AddContactActivity extends AppCompatActivity {
         Toast.makeText(this, "联系人已添加", Toast.LENGTH_SHORT).show();
 
         // 返回结果并关闭
-        setResult(RESULT_OK);
+        setResult(RESULT_OK);  // 通知上一个页面操作成功
         finish();
     }
 }
